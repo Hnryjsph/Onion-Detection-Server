@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Onion Disease Detection</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2E7D32;
+            --background-color: #F5F5F5;
+            --text-color: #333;
+            --error-color: #D32F2F;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            padding: 0;
+            margin: 0;
+        }
+
+        .header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .upload-form {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .upload-form h2 {
+            color: var(--secondary-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        .file-input-container {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .file-input-container input[type="file"] {
+            width: 100%;
+            padding: 1rem;
+            border: 2px dashed var(--primary-color);
+            border-radius: 4px;
+            background-color: rgba(76, 175, 80, 0.05);
+            cursor: pointer;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .results {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .results h2 {
+            color: var(--secondary-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        .detection-image {
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+            border-radius: 4px;
+            margin: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .detections-list {
+            margin-top: 2rem;
+        }
+
+        .detections-list h3 {
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .detection-item {
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background-color: rgba(76, 175, 80, 0.1);
+            border-radius: 4px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .error {
+            background-color: rgba(211, 47, 47, 0.1);
+            color: var(--error-color);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+            border-left: 4px solid var(--error-color);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary-color);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .upload-form, .results {
+                padding: 1.5rem;
+            }
+
+            button {
+                padding: 0.8rem;
+            }
+        }
+
+        .history-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: 2rem;
+        }
+
+        .history-section h2 {
+            color: var(--secondary-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        .history-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .history-item {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .history-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .history-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .history-details {
+            padding: 1rem;
+        }
+
+        .history-date {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .history-detections {
+            margin-top: 0.5rem;
+        }
+
+        .history-detection-item {
+            padding: 0.5rem;
+            margin: 0.25rem 0;
+            background-color: rgba(76, 175, 80, 0.1);
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .history-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Onion Disease Detection</h1>
+        <p>Upload an image of an onion plant to detect potential diseases</p>
+    </div>
+
+    <div class="container">
+        <div class="upload-form">
+            <h2>Upload Image</h2>
+            <form method="post" enctype="multipart/form-data" id="uploadForm">
+                {% csrf_token %}
+                <div class="file-input-container">
+                    <input type="file" name="image" accept="image/*" required>
+                </div>
+                <button type="submit">Analyze Image</button>
+            </form>
+        </div>
+
+        <div class="loading" id="loadingIndicator">
+            <div class="loading-spinner"></div>
+            <p>Processing image...</p>
+        </div>
+
+        {% if error %}
+            <div class="error">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        {% if processed_image %}
+            <div class="results">
+                <h2>Analysis Results</h2>
+                <img src="data:image/jpeg;base64,{{ processed_image }}" alt="Processed Image" class="detection-image">
+                
+                <div class="detections-list">
+                    <h3>Detected Conditions:</h3>
+                    {% for detection in detections %}
+                        <div class="detection-item">
+                            <strong>{{ detection.class_name }}</strong> - Confidence: {{ detection.confidence }}%
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="history-section">
+            <h2>Detection History</h2>
+            <div class="history-grid">
+                {% for entry in history %}
+                    <div class="history-item">
+                        <img src="data:image/jpeg;base64,{{ entry.processed_image }}" alt="Processed Image" class="history-image">
+                        <div class="history-details">
+                            <div class="history-date">{{ entry.created_at|date:"F j, Y, g:i a" }}</div>
+                            <div class="history-detections">
+                                {% for detection in entry.detections %}
+                                    <div class="history-detection-item">
+                                        <strong>{{ detection.class_name }}</strong> - {{ detection.confidence }}%
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p>No detection history available.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function() {
+            document.getElementById('loadingIndicator').style.display = 'block';
+        });
+    </script>
+</body>
+</html> 
